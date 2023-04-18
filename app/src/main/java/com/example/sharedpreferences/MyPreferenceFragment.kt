@@ -2,8 +2,10 @@ package com.example.sharedpreferences
 
 import android.os.Bundle
 import androidx.preference.CheckBoxPreference
-import androidx.preference.Preference
+import androidx.preference.ListPreference
+import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreferenceCompat
 
 class MyPreferenceFragment : PreferenceFragmentCompat() {
 
@@ -18,6 +20,37 @@ class MyPreferenceFragment : PreferenceFragmentCompat() {
                 title = "Заблокировать EditText?"
             }
             preferenceScreen.addPreference(simplePreference)
+
+            val preferenceCategory = PreferenceCategory(it).apply {
+                title = "Внешний вид"
+            }
+            preferenceScreen.addPreference(preferenceCategory)
+
+            val switchPreference = SwitchPreferenceCompat(it).apply {
+                title = "Ночная тема"
+                key = Constants.PREFS_NIGHT_MODE
+            }
+            preferenceCategory.addPreference(switchPreference)
+
+            val listPreference = ListPreference(it).apply {
+                title = "Тема"
+                key = Constants.PREFS_THEME
+                entries = arrayOf("Светлая тема", "Зеленая тема")
+                entryValues = arrayOf(Constants.THEME_DEFAULT, Constants.THEME_GREEN)
+            }
+            preferenceCategory.addPreference(listPreference)
+
+            listPreference.setOnPreferenceChangeListener { preference, newValue ->
+                (activity as MyPreferenceActivity).recreate()
+                true
+            }
+            listPreference.isEnabled = !Saver.bool(Constants.PREFS_NIGHT_MODE)
+//            listPreference.dependency = switchPreference.key
+            switchPreference.setOnPreferenceChangeListener { preference, newValue ->
+                listPreference.isEnabled = !(newValue as Boolean)
+                (activity as MyPreferenceActivity).recreate()
+                true
+            }
         }
     }
 
